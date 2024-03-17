@@ -1,24 +1,55 @@
-// Componente de ordenação e exibição da lista
-import React, { useState } from 'react';
+// Componente SortingApp com árvore binária de busca para ordenação
+import React, { useEffect, useState } from 'react';
 import ProductList from './ProductList';
 
+// Definição da classe para um nó da árvore binária de busca
+class Node {
+  constructor(product) {
+    this.product = product;
+    this.left = null;
+    this.right = null;
+  }
+}
+
 const SortingApp = ({ initialProducts }) => {
-  const [products, setProducts] = useState(initialProducts);
+  const [root, setRoot] = useState(null);
 
-  const handleSort = () => {
-    // Implementação do Heap Sort para ordenar os produtos
-    // Código de ordenação aqui
-    // Suponhamos que os produtos são ordenados e armazenados em uma variável chamada sortedProducts
-    // sortedProducts = heapSort(products);
+  useEffect(() => {
+    // Função para inserir um produto na árvore binária de busca
+    const insertNode = (node, product) => {
+      if (!node) {
+        return new Node(product);
+      }
 
-    // Atualiza o estado dos produtos com a lista ordenada
-    // setProducts(sortedProducts);
+      if (product.vendas < node.product.vendas) {
+        node.left = insertNode(node.left, product);
+      } else {
+        node.right = insertNode(node.right, product);
+      }
+
+      return node;
+    };
+
+    // Construir a árvore binária de busca com os produtos iniciais
+    let treeRoot = null;
+    initialProducts.forEach(product => {
+      treeRoot = insertNode(treeRoot, product);
+    });
+    setRoot(treeRoot);
+  }, [initialProducts]);
+
+  // Função para percorrer a árvore binária de busca em ordem e obter os produtos ordenados
+  const inorderTraversal = node => {
+    if (!node) return [];
+    return [...inorderTraversal(node.left), node.product, ...inorderTraversal(node.right)];
   };
+
+  const sortedProducts = inorderTraversal(root);
 
   return (
     <div>
-      <button onClick={handleSort}>Ordenar</button>
-      <ProductList products={products} />
+      <h2>Lista de Produtos</h2>
+      <ProductList products={sortedProducts} />
     </div>
   );
 };
